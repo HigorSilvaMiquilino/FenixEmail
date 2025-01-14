@@ -1,0 +1,71 @@
+﻿@using emaildisparator.Models
+@model List<UsuarioViewModel>
+
+@{
+    ViewData["Title"] = "Lista de usuários";
+}
+
+<h2>Lista de usuário</h2>
+
+
+<form method="post" asp-action="SendEmails">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Sobrenome</th>
+                <th>Email</th>
+                <th>
+                    <input type="checkbox" id="selectAll" />
+                    Selecionar todos
+                </th>
+                <th>Deletar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.Nome</td>
+                    <td>@user.Sobrenome</td>
+                    <td>@user.Email</td>
+                    <td>
+                        <input type="checkbox" name="selectedEmails" value="@user.Email" class="user-checkbox" />
+                    </td>
+                    <td>
+                        <button type="submit" class="btn btn-danger delete-btn" data-user-id="@user.Id">
+                            Deletar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-primary">Enviar e-mails</button>
+</form>
+
+@section Scripts {
+    <script>
+        document.getElementById('selectAll').addEventListener('change', function () {
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+        });
+
+
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const userId = this.getAttribute('data-user-id');
+                    fetch(`/Home/Delete?userId=${userId}`, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        }
+                    }).then(response => {
+                        if (response.ok) {
+                            window.location.reload(); 
+                        }
+                    });
+            });
+        });
+    </script>
+}
