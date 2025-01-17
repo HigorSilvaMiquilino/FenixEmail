@@ -9,5 +9,8 @@ namespace FenixEmail.Data
             : base(options)
         {
         }
+
+        
+        public DbSet<EmailLog> EmailLogs { get; set; }
     }
 }

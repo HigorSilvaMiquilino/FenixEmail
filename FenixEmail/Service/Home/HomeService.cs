@@ -2,12 +2,13 @@
 using emaildisparator.Service.Email;
 using FenixEmail.Data;
 using FenixEmail.Models;
+using FenixEmail.Service.Email;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace emaildisparator.Service.Home
 {
-    public class HomeService : IHomeService
+    public class HomeService : IHomeService, IEmailHelper
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -76,8 +77,9 @@ namespace emaildisparator.Service.Home
             {
                 var data = await _userManager.Users.Where(x => x.Email == selectedEmail).ToListAsync();
 
-                if (data == null)
+                if (data == null || !data.Any())
                 {
+                    await LogEmailAsync(selectedEmail, EmailStatusEnum.Erro.ToString(), "Usuário não encontrado");
                     throw new Exception("User not found");
                 }
 
@@ -85,9 +87,11 @@ namespace emaildisparator.Service.Home
                 {
                     if (user == null || string.IsNullOrEmpty(user.Email))
                     {
+                        await LogEmailAsync(selectedEmail, EmailStatusEnum.Erro.ToString(), "Usuário não encontrado");
                         continue;
                     }
                     await _enviarEmails.EnviarEmailslAsync(user.Email, user.Nome);
+                    await LogEmailAsync(user.Email, EmailStatusEnum.Sucesso.ToString(), "");
                 }
             }
         }
@@ -111,6 +115,25 @@ namespace emaildisparator.Service.Home
                 });
             }
             return users;
+        }
+
+        public async Task<List<EmailLog>> GetEmailLogsAsync()
+        {
+            return await _context.EmailLogs.OrderByDescending(log => log.DataEnvio).ToListAsync();
+        }
+
+        public async Task LogEmailAsync(string email, string status, string mensagemErro)
+        {
+            var log = new EmailLog
+            {
+                Email = email,
+                Status = status,
+                DataEnvio = DateTime.Now,
+                MensagemErro = mensagemErro
+            };
+
+            _context.EmailLogs.Add(log);
+            await _context.SaveChangesAsync();
         }
     }
 }

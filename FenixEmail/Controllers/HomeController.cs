@@ -42,6 +42,13 @@ namespace emaildisparator.Controllers
             return View();
         }
 
+        [HttpGet]
+        public async Task<IActionResult> EmailLogs()
+        {
+
+            return View(await _homeService.GetEmailLogsAsync());
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Registrar(RegistrarUserModel model)

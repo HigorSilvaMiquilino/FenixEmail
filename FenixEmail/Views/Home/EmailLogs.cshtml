@@ -1,0 +1,40 @@
+﻿@model List<EmailLog>
+
+@{
+    ViewData["Title"] = "Logs de E-mail";
+}
+
+<h2>Logs de E-mail</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Data Envio</th>
+            <th>Menssagem de erro</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var log in Model)
+        {
+            <tr>
+                <td>@log.Email</td>
+                <td>
+                    @if (log.Status == FenixEmail.Service.Email.EmailStatusEnum.Sucesso.ToString()){
+                        <span style="color: green;">@log.Status</span>
+                    }
+                    else if (log.Status == FenixEmail.Service.Email.EmailStatusEnum.Erro.ToString()){
+                        <span style="color: red;">@log.Status</span>
+                    }
+                    else
+                    {
+                        @log.Status
+                    }
+                </td>
+                <td>@log.DataEnvio.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                <td>@log.MensagemErro</td>
+            </tr>
+        }
+    </tbody>
+</table>
